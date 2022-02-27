@@ -1,0 +1,37 @@
+schema-version: 1.0
+
+type: builder
+
+description: |
+  Le paquet libxslt contient les bibliothèques XSLT utilisés pour étendre les bibliothèques libxml2 afin qu'elles supportent les fichiers XSLT.
+
+  Programmes installés: xslt-config et xsltproc
+  Bibliothèques installées: libexslt.so, libxslt.so et éventuellement, le module Python libxsltmod.so
+  Répertoires installés: /usr/include/libexslt, /usr/include/libxslt, /usr/lib/libxslt-plugins, /usr/share/doc/libxslt-1.1.35, et /usr/share/doc/libxslt-python-1.1.35
+  Descriptions courtes 
+    xslt-config: est utilisé pour trouver le pré-processeur, éditer les liens, et compiler les drapeaux nécessaires pour utiliser les bibliothèques libxslt dans des programmes tiers
+    xsltproc: est utilisé pour fournir des feuilles de style XSLT aux documents XML
+    libexslt.so: est utilisée pour fournir des extensions aux fonctions XSLT
+    libxslt.so: fournit des extensions aux bibliothèques libxml2 pour analyser des fichiers qui utilisent le format XSLT
+  
+in:
+  version: 1.1.35
+
+dependencies:
+  - libxml2
+
+provision:
+  - url:
+      from: https://download.gnome.org/sources/libxslt/1.1/libxslt-{% version %}.tar.xz
+      todir: "{% xbeeSrc %}"
+
+
+build:
+  - shell:
+      cmds:
+        - sed -i s/3000/5000/ libxslt/transform.c doc/xsltproc.{1,xml}
+        - ./configure --prefix=/usr --disable-static --without-python
+        - make
+        - sed -e 's@\$Date\$@16 February 2022@' -i doc/xsltproc.1
+        - make install DESTDIR={% xbeeOut %}
+      directory: "{% xbeeSrc %}/libxslt-{% version %}"
